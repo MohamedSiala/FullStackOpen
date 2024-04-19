@@ -3,12 +3,15 @@ import personsService from "./services/persons";
 import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
+import Notification from "./Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchName, setSearchName] = useState("");
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     personsService.getAll().then((response) => setPersons(response));
@@ -29,6 +32,11 @@ const App = () => {
         setPersons(persons.concat(returnedPerson));
         setNewName("");
         setNewNumber("");
+        setError(false);
+        setMessage(`Added ${returnedPerson.name}`);
+        setTimeout(() => {
+          setMessage(null);
+        }, 4000);
       });
     } else {
       if (
@@ -50,11 +58,20 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
+            setError(false);
+            setMessage(`Modified ${returnedPerson.name}`);
+            setTimeout(() => {
+              setMessage(null);
+            }, 4000);
           })
           .catch(() => {
-            alert(
-              `the person '${person.name}' was already deleted from server`
+            setError(true);
+            setMessage(
+              `Information of ${person.name} has already been removed from the server`
             );
+            setTimeout(() => {
+              setMessage(null);
+            }, 4000);
           });
       }
     }
@@ -68,7 +85,16 @@ const App = () => {
         .then((response) =>
           setPersons(persons.filter((person) => person.id !== response.id))
         )
-        .catch(() => alert(`person was already deleted from server`));
+        .catch(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+          setError(true);
+          setMessage(
+            `Information of ${personToDelete.name} has already been removed from the server`
+          );
+          setTimeout(() => {
+            setMessage(null);
+          }, 4000);
+        });
     }
   };
 
@@ -83,11 +109,12 @@ const App = () => {
   };
 
   const personsToShow = persons.filter((person) =>
-    person.name.toLowerCase().startsWith(searchName.toLowerCase())
+    person.name.toLowerCase().includes(searchName.toLowerCase())
   );
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} error={error} />
       <Filter searchName={searchName} handleSearchChange={handleSearchChange} />
       <h2>Add a new person</h2>
       <PersonForm
