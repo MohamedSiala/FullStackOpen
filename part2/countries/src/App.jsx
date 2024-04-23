@@ -24,14 +24,7 @@ const App = () => {
     mainPage = <div>fetching countries ... </div>;
   } else {
     if (countriesToShow.length > 10) {
-      // mainPage = <div>Too many matches, try another filter</div>;
-      mainPage = countriesToShow.map((country) => (
-        <Country
-          key={country.name.common}
-          country={country}
-          api_key={api_key}
-        />
-      ));
+      mainPage = <div>Too many matches, try another filter</div>;
     } else if (countriesToShow.length > 1) {
       mainPage = countriesToShow.map((country) => (
         <Country
